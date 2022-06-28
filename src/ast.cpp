@@ -228,10 +228,14 @@ std::vector<std::shared_ptr<expression> > find_all_applications(const std::share
 
 std::vector<std::shared_ptr<expression> > run_exhaustive_search(const std::shared_ptr<expression> &expr, const std::vector<std::shared_ptr<rule> > &rules) {
     std::vector<std::shared_ptr<expression> > queue;
+    std::map<int64_t, std::vector<std::shared_ptr<expression> > > used;
+
     queue.push_back(expr);
+    used[expr->hash].push_back(expr);
 
     for(size_t i = 0; i < queue.size(); i ++) {
         const auto curr = clone(queue[i]);
+
         #ifdef DEBUG
             std::cerr << curr << std::endl;
         #endif
@@ -245,8 +249,8 @@ std::vector<std::shared_ptr<expression> > run_exhaustive_search(const std::share
                 #endif
 
                 bool ok = true;
-                for(size_t j = 0; j < queue.size(); j ++) {
-                    if(is_equal(queue[j], adj)) {
+                for(const auto &probable_match : used[adj->hash]) {
+                    if(is_equal(probable_match, adj)) {
                         ok = false;
                         break;
                     }
@@ -254,6 +258,7 @@ std::vector<std::shared_ptr<expression> > run_exhaustive_search(const std::share
 
                 if(ok) {
                     queue.push_back(adj);
+                    used[adj->hash].push_back(adj);
                 }
             }
         }

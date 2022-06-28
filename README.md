@@ -1,7 +1,7 @@
 # proof-assistant
 Compact proof assistant
 
-See example code in code.txt, which prooves that $(a+b)^2=(a^2+(b^2+a\*b\*2))$ in less than 1 second.
+See example code in code.txt, which proves that $(a+b)^2=(a^2+a\*b\*2+b^2)$ in less than 1 second.
 
 The tool currently supports:
 * expressions can contain free variables - these are variables which can match any other expression, they should be prefixed with \*

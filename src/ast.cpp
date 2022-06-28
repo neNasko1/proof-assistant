@@ -10,18 +10,17 @@
 const int64_t HASH_BASE = 257;
 
 expression::expression(const std::string name, bool is_free) : name(name), is_free(is_free), hash(0), pow(1) {
-    if(this->is_free) {
-        this->hash = (this->hash * HASH_BASE + (int64_t)'*');
-        this->pow *= HASH_BASE;
-    }
-
-    for(const auto it : name) {
-        this->hash = (this->hash * HASH_BASE + (int64_t)it);
-        this->pow *= HASH_BASE;
-    }
-
+    this->recalculate_hash();
 }
+
 expression::expression(const std::string name, std::vector<std::shared_ptr<expression> > &args, bool is_free) : name(name), args(std::move(args)), is_free(is_free), hash(0), pow(1) {
+    this->recalculate_hash();
+}
+
+void expression::recalculate_hash() {
+    this->hash = 0;
+    this->pow = 1;
+
     if(this->is_free) {
         this->hash = (this->hash * HASH_BASE + (int64_t)'*');
         this->pow *= HASH_BASE;
@@ -32,10 +31,19 @@ expression::expression(const std::string name, std::vector<std::shared_ptr<expre
         this->pow *= HASH_BASE;
     }
 
+    this->hash = (this->hash * HASH_BASE + (int64_t)'(');
+    this->pow *= HASH_BASE;
+    
     for(const auto &it : this->args) {
         this->hash = (this->hash + it->hash * this->pow);
         this->pow = (this->pow * it->pow);
+
+        this->hash = (this->hash * HASH_BASE + (int64_t)',');
+        this->pow *= HASH_BASE;
     }
+
+    this->hash = (this->hash * HASH_BASE + (int64_t)')');
+    this->pow *= HASH_BASE;
 }
 
 std::ostream& operator <<(std::ostream &out, const std::shared_ptr<expression> &expr) {
@@ -64,11 +72,9 @@ bool is_equal(const std::shared_ptr<expression> &expr1, const std::shared_ptr<ex
         return false;
     }
 
-    /*
     if(expr1->hash != expr2->hash) {
         return false;
     }
-    */
 
     for(size_t i = 0; i < expr1->args.size(); i ++) {
         if(!is_equal(expr1->args[i], expr2->args[i])) {
@@ -86,7 +92,8 @@ std::shared_ptr<expression> clone(const std::shared_ptr<expression> &expr) {
         ret->args.push_back(clone(it));
     }
 
-    return std::move(ret);
+    ret->recalculate_hash();
+    return ret;
 }
 
 std::shared_ptr<expression> clone_and_replace(const std::shared_ptr<expression> &expr, const std::shared_ptr<expression> &to_replace, const std::shared_ptr<expression> &replacement) {
@@ -100,7 +107,8 @@ std::shared_ptr<expression> clone_and_replace(const std::shared_ptr<expression> 
         ret->args.push_back(clone_and_replace(it, to_replace, replacement));
     }
 
-    return std::move(ret);
+    ret->recalculate_hash();
+    return ret;
 }
 
 
@@ -177,6 +185,7 @@ std::optional<std::shared_ptr<expression> > apply_matched(const std::shared_ptr<
 
         ret->args.push_back(apply_opt.value());
     }
+    ret->recalculate_hash();
 
     return ret;
 }
@@ -256,9 +265,11 @@ std::vector<std::shared_ptr<expression> > run_exhaustive_search(const std::share
 std::vector<std::shared_ptr<expression> > find_application_path(const std::shared_ptr<expression> &expr, const std::shared_ptr<expression> &target, const std::vector<std::shared_ptr<rule> > &rules) {
     std::vector<std::shared_ptr<expression> > queue;
     std::map<int32_t, int32_t> parent;
+    std::map<int64_t, std::vector<std::shared_ptr<expression> > > used;
 
     parent[0] = -1;
     queue.push_back(expr);
+    used[expr->hash].push_back(expr);
 
     int32_t found = -1;
 
@@ -283,8 +294,8 @@ std::vector<std::shared_ptr<expression> > find_application_path(const std::share
                 #endif
 
                 bool ok = true;
-                for(size_t j = 0; j < queue.size(); j ++) {
-                    if(is_equal(queue[j], adj)) {
+                for(const auto &probable_match : used[adj->hash]) {
+                    if(is_equal(probable_match, adj)) {
                         ok = false;
                         break;
                     }
@@ -293,6 +304,7 @@ std::vector<std::shared_ptr<expression> > find_application_path(const std::share
                 if(ok) {
                     queue.push_back(adj);
                     parent[queue.size() - 1] = i;
+                    used[adj->hash].push_back(adj);
                 }
             }
         }

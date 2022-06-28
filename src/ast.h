@@ -18,6 +18,8 @@ struct expression {
     expression(const std::string name, bool is_free = false);
     expression(const std::string name, std::vector<std::shared_ptr<expression> > &args, bool is_free = false);
     ~expression() = default;
+
+    void recalculate_hash();
 }; 
 
 bool is_equal(const std::shared_ptr<expression> &expr1, const std::shared_ptr<expression> &expr2);

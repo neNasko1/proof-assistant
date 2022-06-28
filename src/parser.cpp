@@ -44,6 +44,8 @@ std::shared_ptr<expression> parse_expression(const std::vector<token> &tokens, s
         }
     }
 
+    ret->recalculate_hash();
+
     return ret;
 }
 

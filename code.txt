@@ -9,4 +9,11 @@ rule both mult(*a, *b) mult(*b, *a)
 
 equal pow(sum(*a, *b), 2) sum(pow(*a, 2), sum(pow(*b, 2), mult(mult(*a, *b), 2)))
 
+rule neg(neg(*a)) *a
+rule sum(*a, neg(*a)) 0
+rule sum(*a, 0) *a
+rule both mult(*a, neg(*b)) neg(mult(*a, *b))
+
+equal mult(sum(*a, *b), sum(*a, neg(*b))) sum(pow(*a, 2), neg(pow(*b, 2)))
+
 #apply sum(sum(*a, *b), sum(*a, *b))

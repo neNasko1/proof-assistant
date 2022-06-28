@@ -4,6 +4,7 @@
 #include <map>
 #include <functional>
 #include <fstream>
+#include <string_view>
 
 #include "ast.h"
 #include "parser.h"

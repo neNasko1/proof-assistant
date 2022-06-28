@@ -234,7 +234,7 @@ std::vector<std::shared_ptr<expression> > run_exhaustive_search(const std::share
     used[expr->hash].push_back(expr);
 
     for(size_t i = 0; i < queue.size(); i ++) {
-        const auto curr = clone(queue[i]);
+        const auto curr = queue[i];
 
         #ifdef DEBUG
             std::cerr << curr << std::endl;
@@ -279,7 +279,7 @@ std::vector<std::shared_ptr<expression> > find_application_path(const std::share
     int32_t found = -1;
 
     for(size_t i = 0; i < queue.size(); i ++) {
-        const auto curr = clone(queue[i]);
+        const auto curr = queue[i];
 
         if(is_equal(queue[i], target)) {
             found = i;
@@ -316,7 +316,7 @@ std::vector<std::shared_ptr<expression> > find_application_path(const std::share
     }
 
     std::vector<std::shared_ptr<expression> > ret;
-
+    
     while(found != -1) {
         ret.push_back(queue[found]);
         found = parent[found];

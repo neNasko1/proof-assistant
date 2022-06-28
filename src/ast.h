@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <map>
+#include <string_view>
 
 // An expression, without arguments is equivalent to a variable
 struct expression {

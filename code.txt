@@ -1,0 +1,12 @@
+rule sum(*a, *b) sum(*b, *a)
+rule both sum(sum(*a, *b), sum(*c, *d)) sum(sum(sum(*a, *b), *c), *d)
+rule both sum(sum(*a, *b), *c) sum(*a, sum(*b, *c))
+rule both sum(*a, *a) mult(*a, 2)
+rule both mult(*a, sum(*b, *c)) sum(mult(*a, *b), mult(*a, *c))
+rule both mult(sum(*a, *b), sum(*c, *d)) sum(mult(*a, sum(*c, *d)), mult(*b, sum(*c, *d)))
+rule both mult(*a, *a) pow(*a, 2)
+rule both mult(*a, *b) mult(*b, *a)
+
+equal pow(sum(*a, *b), 2) sum(pow(*a, 2), sum(pow(*b, 2), mult(mult(*a, *b), 2)))
+
+#apply sum(sum(*a, *b), sum(*a, *b))

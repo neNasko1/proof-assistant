@@ -9,11 +9,14 @@
 #include "ast.h"
 #include "parser.h"
 
-int main() {
+int main(int argc, char **argv) {
     const auto expr = std::make_shared<expression>("a");    
 
-    // test();
-    parse("code.txt");
+    if(argc < 2) {
+        parse("code.txt");
+    } else {
+        parse(argv[1]);        
+    }
 
     return 0;
 }
